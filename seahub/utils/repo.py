@@ -30,3 +30,11 @@ def send_perm_audit_msg(etype, from_user, to, repo_id, path, perm):
         logger.error("Error when sending perm-audit-%s message: %s" %
                      (etype, str(e)))
 
+def get_origin_repo_info(repo_id):
+    repo = seafile_api.get_repo(repo_id)
+    if repo.origin_repo_id is not None:
+        origin_repo_id = repo.origin_repo_id
+        origin_path = repo.origin_path
+        return (origin_repo_id, origin_path)
+
+    return (None, None)

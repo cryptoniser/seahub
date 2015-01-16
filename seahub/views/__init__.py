@@ -59,7 +59,7 @@ from seahub.utils.star import get_dir_starred_files
 from seahub.utils.timeutils import utc_to_local
 from seahub.views.modules import MOD_PERSONAL_WIKI, enable_mod_for_user, \
     disable_mod_for_user
-from seahub.utils.repo import send_perm_audit_msg
+from seahub.utils.repo import send_perm_audit_msg, get_origin_repo_info
 from seahub.utils.devices import get_user_devices, do_unlink_device
 import seahub.settings as settings
 from seahub.settings import FILE_PREVIEW_MAX_SIZE, INIT_PASSWD, USE_PDFJS, \
@@ -1150,7 +1150,17 @@ def unsetinnerpub(request, repo_id):
                                                                    repo.id)
         else:
             seaserv.unset_inner_pub_repo(repo.id)
-            send_perm_audit_msg('delete-repo-perm', username, 'all', repo_id, '/', perm)
+
+            origin_repo_id, origin_path = get_origin_repo_info(repo.id)
+            if origin_repo_id is not None:
+                perm_repo_id = origin_repo_id
+                perm_path = origin_path
+            else:
+                perm_repo_id = repo.id
+                perm_path =  '/'
+
+            send_perm_audit_msg('delete-repo-perm', username, 'all', \
+                                perm_repo_id, perm_path, perm)
 
         messages.success(request, _('Unshare "%s" successfully.') % repo.name)
     except SearpcError:
